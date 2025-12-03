@@ -6,6 +6,8 @@ import { Card, CardContent, CardFooter, CardHeader, CardTitle } from '@/componen
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import Icon from '@/components/ui/icon';
 import { Checkbox } from '@/components/ui/checkbox';
+import { useNavigate } from 'react-router-dom';
+import { CartModal } from '@/components/CartModal';
 
 interface Product {
   id: number;
@@ -18,6 +20,10 @@ interface Product {
   discount?: number;
   image: string;
   warranty: boolean;
+}
+
+interface CartItem extends Product {
+  quantity: number;
 }
 
 const products: Product[] = [
@@ -81,10 +87,13 @@ const categories = [
 ];
 
 const Index = () => {
+  const navigate = useNavigate();
   const [searchQuery, setSearchQuery] = useState('');
   const [compareList, setCompareList] = useState<number[]>([]);
   const [activeCategory, setActiveCategory] = useState('Все товары');
   const [searchType, setSearchType] = useState<'general' | 'article' | 'vin'>('general');
+  const [cartItems, setCartItems] = useState<CartItem[]>([]);
+  const [isCartOpen, setIsCartOpen] = useState(false);
 
   const toggleCompare = (productId: number) => {
     setCompareList(prev =>
@@ -93,6 +102,33 @@ const Index = () => {
         : [...prev, productId]
     );
   };
+
+  const addToCart = (product: Product) => {
+    setCartItems(prev => {
+      const existing = prev.find(item => item.id === product.id);
+      if (existing) {
+        return prev.map(item =>
+          item.id === product.id
+            ? { ...item, quantity: item.quantity + 1 }
+            : item
+        );
+      }
+      return [...prev, { ...product, quantity: 1 }];
+    });
+    setIsCartOpen(true);
+  };
+
+  const updateCartQuantity = (id: number, quantity: number) => {
+    setCartItems(prev =>
+      prev.map(item => (item.id === id ? { ...item, quantity } : item))
+    );
+  };
+
+  const removeFromCart = (id: number) => {
+    setCartItems(prev => prev.filter(item => item.id !== id));
+  };
+
+  const totalCartItems = cartItems.reduce((sum, item) => sum + item.quantity, 0);
 
   return (
     <div className="min-h-screen bg-background">
@@ -108,7 +144,7 @@ const Index = () => {
             </div>
 
             <nav className="hidden md:flex items-center gap-1">
-              <Button variant="ghost" className="text-white hover:text-primary">
+              <Button variant="ghost" className="text-white hover:text-primary" onClick={() => navigate('/garage')}>
                 <Icon name="Warehouse" size={18} className="mr-2" />
                 Гараж
               </Button>
@@ -117,9 +153,14 @@ const Index = () => {
               <Button variant="ghost" className="text-white hover:text-primary">Контакты</Button>
             </nav>
 
-            <Button className="bg-primary hover:bg-primary/90">
+            <Button className="bg-primary hover:bg-primary/90 relative" onClick={() => setIsCartOpen(true)}>
               <Icon name="ShoppingCart" size={18} className="mr-2" />
               Корзина
+              {totalCartItems > 0 && (
+                <span className="absolute -top-1 -right-1 bg-red-500 text-white text-xs rounded-full w-5 h-5 flex items-center justify-center">
+                  {totalCartItems}
+                </span>
+              )}
             </Button>
           </div>
 
@@ -205,7 +246,7 @@ const Index = () => {
               <Button variant="outline" onClick={() => setCompareList([])}>
                 Очистить
               </Button>
-              <Button className="bg-primary hover:bg-primary/90">
+              <Button className="bg-primary hover:bg-primary/90" onClick={() => navigate('/compare')}>
                 Сравнить
               </Button>
             </div>
@@ -262,7 +303,7 @@ const Index = () => {
               </CardContent>
 
               <CardFooter className="p-4 pt-0">
-                <Button className="w-full bg-primary hover:bg-primary/90">
+                <Button className="w-full bg-primary hover:bg-primary/90" onClick={() => addToCart(product)}>
                   <Icon name="ShoppingCart" size={16} className="mr-2" />
                   В корзину
                 </Button>
@@ -318,6 +359,14 @@ const Index = () => {
           </div>
         </div>
       </footer>
+
+      <CartModal
+        open={isCartOpen}
+        onOpenChange={setIsCartOpen}
+        items={cartItems}
+        onUpdateQuantity={updateCartQuantity}
+        onRemoveItem={removeFromCart}
+      />
     </div>
   );
 };
