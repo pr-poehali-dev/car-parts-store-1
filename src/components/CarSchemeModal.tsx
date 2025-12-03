@@ -5,6 +5,7 @@ import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import Icon from '@/components/ui/icon';
 import { CarPartsTree } from './CarPartsTree';
+import { getCarImage } from '@/utils/carImages';
 
 interface CarPart {
   id: string;
@@ -135,6 +136,8 @@ export const CarSchemeModal = ({ open, onOpenChange, carInfo, onPartSelect }: Ca
     onOpenChange(false);
   };
 
+  const carImageUrl = carInfo ? getCarImage(carInfo.brand, carInfo.model) : '';
+
   const currentPart = carParts.find(p => p.id === selectedPart);
 
   return (
@@ -170,45 +173,56 @@ export const CarSchemeModal = ({ open, onOpenChange, carInfo, onPartSelect }: Ca
 
           <TabsContent value="scheme" className="mt-4">
             <div className="relative bg-gradient-to-b from-secondary to-background rounded-lg p-6 overflow-hidden">
-              <div className="relative w-full max-w-4xl mx-auto" style={{ aspectRatio: '16/9' }}>
-                <svg
-                  viewBox="0 0 800 450"
-                  className="w-full h-full"
-                >
-                  <defs>
-                    <linearGradient id="carGradient" x1="0%" y1="0%" x2="100%" y2="100%">
-                      <stop offset="0%" style={{ stopColor: '#2d3748', stopOpacity: 1 }} />
-                      <stop offset="100%" style={{ stopColor: '#1a202c', stopOpacity: 1 }} />
-                    </linearGradient>
-                  </defs>
+              <div className="relative w-full max-w-4xl mx-auto mb-6" style={{ aspectRatio: '16/9' }}>
+                {carImageUrl ? (
+                  <div className="relative w-full h-full">
+                    <img 
+                      src={carImageUrl} 
+                      alt={carInfo ? `${carInfo.brand} ${carInfo.model}` : 'Car'}
+                      className="w-full h-full object-contain rounded-lg"
+                    />
+                    <div className="absolute inset-0 bg-gradient-to-t from-background/80 to-transparent rounded-lg" />
+                  </div>
+                ) : (
+                  <svg
+                    viewBox="0 0 800 450"
+                    className="w-full h-full"
+                  >
+                    <defs>
+                      <linearGradient id="carGradient" x1="0%" y1="0%" x2="100%" y2="100%">
+                        <stop offset="0%" style={{ stopColor: '#2d3748', stopOpacity: 1 }} />
+                        <stop offset="100%" style={{ stopColor: '#1a202c', stopOpacity: 1 }} />
+                      </linearGradient>
+                    </defs>
 
-                  <path
-                    d="M 150 200 L 200 180 L 280 170 L 400 165 L 500 170 L 580 180 L 650 200 L 680 220 L 680 280 L 650 300 L 150 300 L 120 280 L 120 220 Z"
-                    fill="url(#carGradient)"
-                    stroke="#ff6b35"
-                    strokeWidth="2"
-                    opacity="0.8"
-                  />
+                    <path
+                      d="M 150 200 L 200 180 L 280 170 L 400 165 L 500 170 L 580 180 L 650 200 L 680 220 L 680 280 L 650 300 L 150 300 L 120 280 L 120 220 Z"
+                      fill="url(#carGradient)"
+                      stroke="#ff6b35"
+                      strokeWidth="2"
+                      opacity="0.8"
+                    />
 
-                  <ellipse cx="230" cy="300" rx="35" ry="35" fill="#1a202c" stroke="#ff6b35" strokeWidth="2" />
-                  <ellipse cx="570" cy="300" rx="35" ry="35" fill="#1a202c" stroke="#ff6b35" strokeWidth="2" />
+                    <ellipse cx="230" cy="300" rx="35" ry="35" fill="#1a202c" stroke="#ff6b35" strokeWidth="2" />
+                    <ellipse cx="570" cy="300" rx="35" ry="35" fill="#1a202c" stroke="#ff6b35" strokeWidth="2" />
 
-                  <path
-                    d="M 280 180 L 320 175 L 350 185 L 350 230 L 280 230 Z"
-                    fill="#1a202c"
-                    stroke="#ff6b35"
-                    strokeWidth="1"
-                    opacity="0.6"
-                  />
+                    <path
+                      d="M 280 180 L 320 175 L 350 185 L 350 230 L 280 230 Z"
+                      fill="#1a202c"
+                      stroke="#ff6b35"
+                      strokeWidth="1"
+                      opacity="0.6"
+                    />
 
-                  <path
-                    d="M 370 175 L 480 175 L 510 185 L 510 230 L 370 230 Z"
-                    fill="#1a202c"
-                    stroke="#ff6b35"
-                    strokeWidth="1"
-                    opacity="0.6"
-                  />
-                </svg>
+                    <path
+                      d="M 370 175 L 480 175 L 510 185 L 510 230 L 370 230 Z"
+                      fill="#1a202c"
+                      stroke="#ff6b35"
+                      strokeWidth="1"
+                      opacity="0.6"
+                    />
+                  </svg>
+                )}
 
                 {carParts.map((part) => {
                   const isSelected = selectedPart === part.id;

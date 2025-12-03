@@ -10,6 +10,7 @@ import { useNavigate } from 'react-router-dom';
 import { CartModal } from '@/components/CartModal';
 import { CarSelector } from '@/components/CarSelector';
 import { CarSchemeModal } from '@/components/CarSchemeModal';
+import { allParts, fluids, getPartsByCar } from '@/data/partsDatabase';
 
 interface Product {
   id: number;
@@ -29,53 +30,30 @@ interface CartItem extends Product {
 }
 
 const products: Product[] = [
-  {
-    id: 1,
-    name: 'Моторное масло Castrol EDGE 5W-30',
-    brand: 'Castrol',
-    article: '156EA9',
-    price: 3250,
-    rating: 4.8,
-    reviews: 156,
-    discount: 17,
-    image: '/placeholder.svg',
+  ...allParts.slice(0, 10).map((part, idx) => ({
+    id: idx + 1,
+    name: part.name,
+    brand: part.brand,
+    article: part.article,
+    price: part.price,
+    rating: 4.5 + Math.random() * 0.5,
+    reviews: Math.floor(Math.random() * 300) + 50,
+    discount: Math.random() > 0.7 ? Math.floor(Math.random() * 20) + 5 : undefined,
+    image: part.image,
+    warranty: part.isOriginal
+  })),
+  ...fluids.slice(0, 6).map((fluid, idx) => ({
+    id: idx + 100,
+    name: fluid.name,
+    brand: fluid.brand,
+    article: fluid.article,
+    price: fluid.price,
+    rating: 4.6 + Math.random() * 0.4,
+    reviews: Math.floor(Math.random() * 200) + 30,
+    discount: Math.random() > 0.8 ? Math.floor(Math.random() * 15) + 5 : undefined,
+    image: fluid.image,
     warranty: true
-  },
-  {
-    id: 2,
-    name: 'Тормозные колодки Brembo P85020',
-    brand: 'Brembo',
-    article: 'P85020',
-    price: 4890,
-    rating: 4.9,
-    reviews: 89,
-    discount: 9,
-    image: '/placeholder.svg',
-    warranty: true
-  },
-  {
-    id: 3,
-    name: 'Аккумулятор Varta Blue Dynamic 60Ah',
-    brand: 'Varta',
-    article: '560409054',
-    price: 6750,
-    rating: 4.7,
-    reviews: 234,
-    image: '/placeholder.svg',
-    warranty: true
-  },
-  {
-    id: 4,
-    name: 'Воздушный фильтр MANN C27192',
-    brand: 'MANN',
-    article: 'C27192',
-    price: 1890,
-    rating: 4.6,
-    reviews: 312,
-    discount: 19,
-    image: '/placeholder.svg',
-    warranty: true
-  }
+  }))
 ];
 
 const categories = [
