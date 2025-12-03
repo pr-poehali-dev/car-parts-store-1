@@ -9,7 +9,7 @@ import { Checkbox } from '@/components/ui/checkbox';
 import { useNavigate } from 'react-router-dom';
 import { CartModal } from '@/components/CartModal';
 import { CarSelector } from '@/components/CarSelector';
-import { InteractiveCarScheme } from '@/components/InteractiveCarScheme';
+import { CarSchemeModal } from '@/components/CarSchemeModal';
 
 interface Product {
   id: number;
@@ -98,6 +98,7 @@ const Index = () => {
   const [isCartOpen, setIsCartOpen] = useState(false);
   const [selectedCar, setSelectedCar] = useState<{ brand: string; model: string; year: string } | null>(null);
   const [selectedCarPart, setSelectedCarPart] = useState<string[] | null>(null);
+  const [isSchemeOpen, setIsSchemeOpen] = useState(false);
 
   const toggleCompare = (productId: number) => {
     setCompareList(prev =>
@@ -209,13 +210,9 @@ const Index = () => {
 
       <div className="container mx-auto px-4 py-6">
         <div className="mb-6">
-          <CarSelector onCarSelect={(car) => setSelectedCar(car)} />
-        </div>
-
-        <div className="mb-6">
-          <InteractiveCarScheme
-            isCarSelected={!!selectedCar}
-            onPartSelect={(categories) => setSelectedCarPart(categories)}
+          <CarSelector 
+            onCarSelect={(car) => setSelectedCar(car)}
+            onSchemeClick={() => setIsSchemeOpen(true)}
           />
         </div>
 
@@ -395,6 +392,16 @@ const Index = () => {
         items={cartItems}
         onUpdateQuantity={updateCartQuantity}
         onRemoveItem={removeFromCart}
+      />
+
+      <CarSchemeModal
+        open={isSchemeOpen}
+        onOpenChange={setIsSchemeOpen}
+        carInfo={selectedCar || undefined}
+        onPartSelect={(categories) => {
+          setSelectedCarPart(categories);
+          setIsSchemeOpen(false);
+        }}
       />
     </div>
   );
