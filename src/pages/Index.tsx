@@ -10,7 +10,10 @@ import { useNavigate } from 'react-router-dom';
 import { CartModal } from '@/components/CartModal';
 import { CarSelector } from '@/components/CarSelector';
 import { CarSchemeModal } from '@/components/CarSchemeModal';
+import { SmartCarSearch } from '@/components/SmartCarSearch';
+import { VinSearch } from '@/components/VinSearch';
 import { allParts, fluids, getPartsByCar } from '@/data/partsDatabase';
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 
 interface Product {
   id: number;
@@ -77,6 +80,8 @@ const Index = () => {
   const [selectedCar, setSelectedCar] = useState<{ brand: string; model: string; year: string } | null>(null);
   const [selectedCarPart, setSelectedCarPart] = useState<string[] | null>(null);
   const [isSchemeOpen, setIsSchemeOpen] = useState(false);
+  const [isSmartSearchOpen, setIsSmartSearchOpen] = useState(false);
+  const [isVinSearchOpen, setIsVinSearchOpen] = useState(false);
 
   const toggleCompare = (productId: number) => {
     setCompareList(prev =>
@@ -166,20 +171,51 @@ const Index = () => {
 
               <div className="mt-3">
                 <div className="flex gap-2">
-                  <Input
-                    placeholder={
-                      searchType === 'general' ? 'Поиск по названию, бренду...' :
-                      searchType === 'article' ? 'Введите артикул...' :
-                      'Введите VIN код автомобиля...'
-                    }
-                    value={searchQuery}
-                    onChange={(e) => setSearchQuery(e.target.value)}
-                    className="flex-1 bg-secondary border-input text-white"
-                  />
-                  <Button className="bg-primary hover:bg-primary/90">
-                    <Icon name="Search" size={18} />
-                  </Button>
+                  {searchType === 'vin' ? (
+                    <Button 
+                      onClick={() => setIsVinSearchOpen(true)}
+                      className="flex-1 bg-primary hover:bg-primary/90 justify-start"
+                    >
+                      <Icon name="Scan" size={18} className="mr-2" />
+                      Открыть поиск по VIN-коду
+                    </Button>
+                  ) : searchType === 'general' ? (
+                    <>
+                      <Input
+                        placeholder="Поиск по названию, бренду, артикулу..."
+                        value={searchQuery}
+                        onChange={(e) => setSearchQuery(e.target.value)}
+                        className="flex-1 bg-secondary border-input text-white"
+                      />
+                      <Button className="bg-primary hover:bg-primary/90">
+                        <Icon name="Search" size={18} />
+                      </Button>
+                    </>
+                  ) : (
+                    <>
+                      <Input
+                        placeholder="Введите артикул производителя..."
+                        value={searchQuery}
+                        onChange={(e) => setSearchQuery(e.target.value)}
+                        className="flex-1 bg-secondary border-input text-white font-mono"
+                      />
+                      <Button className="bg-primary hover:bg-primary/90">
+                        <Icon name="Search" size={18} />
+                      </Button>
+                    </>
+                  )}
                 </div>
+                {searchType === 'general' && (
+                  <Button
+                    variant="ghost"
+                    onClick={() => setIsSmartSearchOpen(true)}
+                    className="w-full mt-2 text-primary hover:text-primary hover:bg-primary/10"
+                    size="sm"
+                  >
+                    <Icon name="Sparkles" size={16} className="mr-2" />
+                    Расширенный поиск с характеристиками двигателя
+                  </Button>
+                )}
               </div>
             </Tabs>
           </div>
@@ -381,6 +417,42 @@ const Index = () => {
           setIsSchemeOpen(false);
         }}
       />
+
+      <Dialog open={isSmartSearchOpen} onOpenChange={setIsSmartSearchOpen}>
+        <DialogContent className="max-w-4xl bg-card max-h-[90vh] overflow-y-auto">
+          <DialogHeader>
+            <DialogTitle>Умный подбор автомобиля</DialogTitle>
+          </DialogHeader>
+          <SmartCarSearch
+            onCarSelect={(carDetails) => {
+              setSelectedCar({
+                brand: carDetails.brand,
+                model: carDetails.model,
+                year: carDetails.year
+              });
+              setIsSmartSearchOpen(false);
+            }}
+          />
+        </DialogContent>
+      </Dialog>
+
+      <Dialog open={isVinSearchOpen} onOpenChange={setIsVinSearchOpen}>
+        <DialogContent className="max-w-2xl bg-card max-h-[90vh] overflow-y-auto">
+          <DialogHeader>
+            <DialogTitle>Поиск по VIN-коду</DialogTitle>
+          </DialogHeader>
+          <VinSearch
+            onVinDecode={(result) => {
+              setSelectedCar({
+                brand: result.brand,
+                model: result.model,
+                year: result.year.toString()
+              });
+              setTimeout(() => setIsVinSearchOpen(false), 2000);
+            }}
+          />
+        </DialogContent>
+      </Dialog>
     </div>
   );
 };

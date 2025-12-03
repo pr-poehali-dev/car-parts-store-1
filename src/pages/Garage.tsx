@@ -1,20 +1,24 @@
 import { useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
-import { Input } from '@/components/ui/input';
-import { Label } from '@/components/ui/label';
 import { Badge } from '@/components/ui/badge';
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter, DialogTrigger } from '@/components/ui/dialog';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import Icon from '@/components/ui/icon';
 import { useNavigate } from 'react-router-dom';
+import { SmartCarSearch } from '@/components/SmartCarSearch';
+import { VinSearch } from '@/components/VinSearch';
+import { getCarImage } from '@/utils/carImages';
+import { allParts, getPartsByCar } from '@/data/partsDatabase';
 
 interface Car {
   id: number;
   brand: string;
   model: string;
   year: number;
-  engine: string;
+  engine?: string;
+  generation?: string;
+  restyling?: string;
   vin?: string;
   image: string;
   isDefault: boolean;
@@ -26,9 +30,11 @@ const mockCars: Car[] = [
     brand: 'Toyota',
     model: 'Camry',
     year: 2018,
-    engine: '2.5L',
+    engine: '2.5L 181 л.с.',
+    generation: 'XV70',
+    restyling: '2017-2020',
     vin: 'JTNB11HK8J3012345',
-    image: '/placeholder.svg',
+    image: getCarImage('Toyota', 'Camry'),
     isDefault: true
   },
   {
@@ -36,9 +42,10 @@ const mockCars: Car[] = [
     brand: 'BMW',
     model: 'X5',
     year: 2020,
-    engine: '3.0L',
+    engine: '3.0L 340 л.с.',
+    generation: 'G05',
     vin: 'WBAJW1C52LWX12345',
-    image: '/placeholder.svg',
+    image: getCarImage('BMW', 'X5'),
     isDefault: false
   }
 ];
