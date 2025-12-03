@@ -8,6 +8,8 @@ import Icon from '@/components/ui/icon';
 import { Checkbox } from '@/components/ui/checkbox';
 import { useNavigate } from 'react-router-dom';
 import { CartModal } from '@/components/CartModal';
+import { CarSelector } from '@/components/CarSelector';
+import { InteractiveCarScheme } from '@/components/InteractiveCarScheme';
 
 interface Product {
   id: number;
@@ -94,6 +96,8 @@ const Index = () => {
   const [searchType, setSearchType] = useState<'general' | 'article' | 'vin'>('general');
   const [cartItems, setCartItems] = useState<CartItem[]>([]);
   const [isCartOpen, setIsCartOpen] = useState(false);
+  const [selectedCar, setSelectedCar] = useState<{ brand: string; model: string; year: string } | null>(null);
+  const [selectedCarPart, setSelectedCarPart] = useState<string[] | null>(null);
 
   const toggleCompare = (productId: number) => {
     setCompareList(prev =>
@@ -205,7 +209,32 @@ const Index = () => {
 
       <div className="container mx-auto px-4 py-6">
         <div className="mb-6">
-          <h2 className="text-sm font-medium text-muted-foreground mb-3">Преимущества автомобиля</h2>
+          <CarSelector onCarSelect={(car) => setSelectedCar(car)} />
+        </div>
+
+        <div className="mb-6">
+          <InteractiveCarScheme
+            isCarSelected={!!selectedCar}
+            onPartSelect={(categories) => setSelectedCarPart(categories)}
+          />
+        </div>
+
+        {selectedCarPart && (
+          <div className="mb-6 p-4 bg-primary/10 border border-primary/20 rounded-lg">
+            <div className="flex items-center justify-between">
+              <div>
+                <p className="text-sm text-muted-foreground mb-1">Подбор для: {selectedCar?.brand} {selectedCar?.model}</p>
+                <p className="font-semibold">Категории: {selectedCarPart.join(', ')}</p>
+              </div>
+              <Button variant="ghost" size="sm" onClick={() => setSelectedCarPart(null)}>
+                <Icon name="X" size={16} />
+              </Button>
+            </div>
+          </div>
+        )}
+
+        <div className="mb-6">
+          <h2 className="text-sm font-medium text-muted-foreground mb-3">Преимущества</h2>
           <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
             <div className="flex items-center gap-3 text-sm">
               <Icon name="CheckCircle" size={20} className="text-primary" />
@@ -213,7 +242,7 @@ const Index = () => {
             </div>
             <div className="flex items-center gap-3 text-sm">
               <Icon name="CheckCircle" size={20} className="text-primary" />
-              <span>Схемы автомобилей</span>
+              <span>Интерактивные схемы</span>
             </div>
             <div className="flex items-center gap-3 text-sm">
               <Icon name="CheckCircle" size={20} className="text-primary" />
