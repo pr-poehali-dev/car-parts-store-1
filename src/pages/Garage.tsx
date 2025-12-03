@@ -57,33 +57,41 @@ const Garage = () => {
   const navigate = useNavigate();
   const [cars, setCars] = useState<Car[]>(mockCars);
   const [isAddDialogOpen, setIsAddDialogOpen] = useState(false);
-  const [newCar, setNewCar] = useState({
-    brand: '',
-    model: '',
-    year: '',
-    engine: '',
-    vin: ''
-  });
+  const [addMethod, setAddMethod] = useState<'smart' | 'vin'>('smart');
 
-  const handleAddCar = () => {
-    if (!newCar.brand || !newCar.model || !newCar.year || !newCar.engine) {
-      return;
-    }
-
+  const handleAddCarFromSmartSearch = (carDetails: any) => {
     const car: Car = {
       id: Date.now(),
-      brand: newCar.brand,
-      model: newCar.model,
-      year: parseInt(newCar.year),
-      engine: newCar.engine,
-      vin: newCar.vin,
-      image: '/placeholder.svg',
+      brand: carDetails.brand,
+      model: carDetails.model,
+      year: parseInt(carDetails.year),
+      engine: carDetails.engine,
+      generation: carDetails.generation,
+      restyling: carDetails.restyling,
+      image: carDetails.image,
       isDefault: cars.length === 0
     };
 
     setCars([...cars, car]);
-    setNewCar({ brand: '', model: '', year: '', engine: '', vin: '' });
     setIsAddDialogOpen(false);
+  };
+
+  const handleAddCarFromVin = (result: any) => {
+    const car: Car = {
+      id: Date.now(),
+      brand: result.brand,
+      model: result.model,
+      year: result.year,
+      engine: `${result.engineVolume} (${result.engine})`,
+      generation: result.generation,
+      restyling: result.restyling,
+      vin: result.vin,
+      image: result.image,
+      isDefault: cars.length === 0
+    };
+
+    setCars([...cars, car]);
+    setTimeout(() => setIsAddDialogOpen(false), 2000);
   };
 
   const setDefaultCar = (id: number) => {
@@ -123,98 +131,10 @@ const Garage = () => {
             <p className="text-muted-foreground">Сохраните свои авто для быстрого подбора запчастей</p>
           </div>
 
-          <Dialog open={isAddDialogOpen} onOpenChange={setIsAddDialogOpen}>
-            <DialogTrigger asChild>
-              <Button className="bg-primary hover:bg-primary/90">
-                <Icon name="Plus" size={18} className="mr-2" />
-                Добавить автомобиль
-              </Button>
-            </DialogTrigger>
-            <DialogContent className="bg-card">
-              <DialogHeader>
-                <DialogTitle>Добавить автомобиль</DialogTitle>
-              </DialogHeader>
-
-              <div className="space-y-4">
-                <div>
-                  <Label htmlFor="brand">Марка *</Label>
-                  <Select value={newCar.brand} onValueChange={(val) => setNewCar({ ...newCar, brand: val })}>
-                    <SelectTrigger className="bg-secondary border-input">
-                      <SelectValue placeholder="Выберите марку" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      {brands.map((brand) => (
-                        <SelectItem key={brand} value={brand}>{brand}</SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
-                </div>
-
-                <div>
-                  <Label htmlFor="model">Модель *</Label>
-                  <Input
-                    id="model"
-                    value={newCar.model}
-                    onChange={(e) => setNewCar({ ...newCar, model: e.target.value })}
-                    placeholder="Например: Camry"
-                    className="bg-secondary border-input"
-                  />
-                </div>
-
-                <div className="grid grid-cols-2 gap-4">
-                  <div>
-                    <Label htmlFor="year">Год *</Label>
-                    <Select value={newCar.year} onValueChange={(val) => setNewCar({ ...newCar, year: val })}>
-                      <SelectTrigger className="bg-secondary border-input">
-                        <SelectValue placeholder="Год" />
-                      </SelectTrigger>
-                      <SelectContent>
-                        {years.map((year) => (
-                          <SelectItem key={year} value={year.toString()}>{year}</SelectItem>
-                        ))}
-                      </SelectContent>
-                    </Select>
-                  </div>
-
-                  <div>
-                    <Label htmlFor="engine">Двигатель *</Label>
-                    <Input
-                      id="engine"
-                      value={newCar.engine}
-                      onChange={(e) => setNewCar({ ...newCar, engine: e.target.value })}
-                      placeholder="2.5L"
-                      className="bg-secondary border-input"
-                    />
-                  </div>
-                </div>
-
-                <div>
-                  <Label htmlFor="vin">VIN код (опционально)</Label>
-                  <Input
-                    id="vin"
-                    value={newCar.vin}
-                    onChange={(e) => setNewCar({ ...newCar, vin: e.target.value.toUpperCase() })}
-                    placeholder="17 символов"
-                    maxLength={17}
-                    className="bg-secondary border-input"
-                  />
-                  <p className="text-xs text-muted-foreground mt-1">
-                    Для точного подбора запчастей
-                  </p>
-                </div>
-              </div>
-
-              <DialogFooter>
-                <Button variant="outline" onClick={() => setIsAddDialogOpen(false)}>
-                  Отмена
-                </Button>
-                <Button onClick={handleAddCar} className="bg-primary hover:bg-primary/90">
-                  <Icon name="Plus" size={16} className="mr-2" />
-                  Добавить
-                </Button>
-              </DialogFooter>
-            </DialogContent>
-          </Dialog>
+          <Button onClick={() => setIsAddDialogOpen(true)} className="bg-primary hover:bg-primary/90">
+            <Icon name="Plus" size={18} className="mr-2" />
+            Добавить автомобиль
+          </Button>
         </div>
 
         {cars.length === 0 ? (
@@ -339,6 +259,35 @@ const Garage = () => {
           </Card>
         </div>
       </div>
+
+      <Dialog open={isAddDialogOpen} onOpenChange={setIsAddDialogOpen}>
+        <DialogContent className="max-w-4xl bg-card max-h-[90vh] overflow-y-auto">
+          <DialogHeader>
+            <DialogTitle>Добавить автомобиль</DialogTitle>
+          </DialogHeader>
+
+          <Tabs value={addMethod} onValueChange={(v) => setAddMethod(v as any)}>
+            <TabsList className="grid w-full grid-cols-2">
+              <TabsTrigger value="smart">
+                <Icon name="Search" size={16} className="mr-2" />
+                Умный подбор
+              </TabsTrigger>
+              <TabsTrigger value="vin">
+                <Icon name="Scan" size={16} className="mr-2" />
+                По VIN-коду
+              </TabsTrigger>
+            </TabsList>
+
+            <TabsContent value="smart" className="mt-4">
+              <SmartCarSearch onCarSelect={handleAddCarFromSmartSearch} />
+            </TabsContent>
+
+            <TabsContent value="vin" className="mt-4">
+              <VinSearch onVinDecode={handleAddCarFromVin} />
+            </TabsContent>
+          </Tabs>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 };
